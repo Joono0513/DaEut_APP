@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as path_provider;
+import '../models/file_upload_response.dart';
+import '../models/service_request.dart';
 
 class InsertScreen extends StatefulWidget {
   const InsertScreen({super.key});
@@ -17,33 +21,34 @@ class _InsertScreenState extends State<InsertScreen> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   List<String> _selectedCategories = [];
-  List<XFile>? _thumbnails = [];
-  List<XFile>? _images = [];
+  XFile? _thumbnail;
+  List<XFile> _images = [];
 
   final ImagePicker _picker = ImagePicker();
 
   Future<void> insert() async {
     if (_formKey.currentState!.validate()) {
-      var url = "http://10.0.2.2:8080/reservation/reservationInsert";
-      var request = http.MultipartRequest('POST', Uri.parse(url));
-
-      request.fields['serviceName'] = _titleController.text;
-      request.fields['servicePrice'] = _priceController.text;
-      request.fields['serviceCategory'] = _selectedCategories.join(',');
-      request.fields['serviceContent'] = _contentController.text;
-
-      if (_thumbnails!.isNotEmpty) {
-        request.files.add(
-          await http.MultipartFile.fromPath('thumbnail', _thumbnails!.first.path),
-        );
-      }
-
-      for (var image in _images!) {
-        request.files.add(await http.MultipartFile.fromPath('file', image.path));
-      }
-
       try {
-        var response = await request.send();
+        // 파일 업로드
+        var thumbnailPath = await _uploadFile(_thumbnail, 'thumbnail');
+        var imagePaths = await Future.wait(_images.map((image) => _uploadFile(image, 'image')));
+
+        // 서비스 등록
+        var serviceRequest = ServiceRequest(
+          serviceName: _titleController.text,
+          servicePrice: int.parse(_priceController.text),
+          serviceCategory: _selectedCategories.join(','),
+          serviceContent: _contentController.text,
+          thumbnailPath: thumbnailPath,
+          filePaths: imagePaths,
+        );
+
+        var url = "http://10.0.2.2:8080/reservation/reservationInsert";
+        var response = await http.post(
+          Uri.parse(url),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(serviceRequest.toJson()),
+        );
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -70,11 +75,40 @@ class _InsertScreenState extends State<InsertScreen> {
     }
   }
 
+  Future<String> _uploadFile(XFile? file, String fileType) async {
+    if (file == null) return '';
+
+    var url = "http://10.0.2.2:8080/file";
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    var fileToUpload = await _getFileFromXFile(file);
+
+    request.fields['fileType'] = fileType; // 추가 데이터 전송
+    request.files.add(
+      await http.MultipartFile.fromPath('file', fileToUpload.path),
+    );
+
+    var response = await request.send();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      var responseData = await response.stream.bytesToString();
+      var jsonResponse = jsonDecode(responseData);
+      var fileUploadResponse = FileUploadResponse.fromJson(jsonResponse);
+      return fileUploadResponse.filePath;
+    } else {
+      throw Exception('파일 업로드 실패');
+    }
+  }
+
+  Future<File> _getFileFromXFile(XFile xfile) async {
+    final directory = await path_provider.getApplicationDocumentsDirectory();
+    final file = File(path.join(directory.path, xfile.name));
+    return File(xfile.path).copy(file.path);
+  }
+
   Future<void> _pickThumbnail() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _thumbnails = [pickedFile];
+        _thumbnail = pickedFile;
       });
     }
   }
@@ -147,7 +181,7 @@ class _InsertScreenState extends State<InsertScreen> {
                 context,
                 label: '썸네일',
                 pickFile: _pickThumbnail,
-                files: _thumbnails,
+                files: _thumbnail != null ? [_thumbnail!] : [],
               ),
               const SizedBox(height: 10),
               _buildFilePicker(
@@ -215,13 +249,13 @@ class _InsertScreenState extends State<InsertScreen> {
         Text(label, style: TextStyle(fontSize: 16)),
         const SizedBox(height: 5),
         OutlinedButton(
-          onPressed: pickFile,
-          child: Text('첨부하기'),
+          onPressed: () => pickFile(),
+          child: const Text('첨부하기'),
         ),
         const SizedBox(height: 5),
         files != null && files.isNotEmpty
             ? Text('${files.length} files selected')
-            : Text('No file selected'),
+            : const Text('No file selected'),
       ],
     );
   }

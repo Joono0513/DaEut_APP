@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class User {
   int? userNo;
   String? userName;
@@ -42,7 +44,7 @@ class User {
       userNo: json['userNo'],
       userName: json['userName'],
       userPhone: json['userPhone'],
-      userBirth: json['userBirth'] != null ? DateTime.parse(json['userBirth']) : null,
+      userBirth: json['userBirth'] != null ? DateFormat('yyyy-MM-dd').parse(json['userBirth']) : null,
       userAddress: json['userAddress'],
       userEmail: json['userEmail'],
       userGender: json['userGender'],
@@ -62,11 +64,12 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
+    final dateFormat = DateFormat('yyyy-MM-dd');
     return {
       'userNo': userNo,
       'userName': userName,
       'userPhone': userPhone,
-      'userBirth': userBirth?.toIso8601String(),
+      'userBirth': userBirth != null ? dateFormat.format(userBirth!) : null,
       'userAddress': userAddress,
       'userEmail': userEmail,
       'userGender': userGender,

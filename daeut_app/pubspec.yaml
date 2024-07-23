@@ -31,6 +31,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+  convert: ^3.1.1
+  image_picker: ^0.8.4+3
+  path: ^1.8.0
+  path_provider: ^2.0.7
+
   #  안전한 저장소
   flutter_secure_storage: ^5.0.0
 
@@ -38,7 +43,7 @@ dependencies:
   provider: ^6.1.1
 
   # http
-  http: ^1.2.0
+  http: ^1.2.2
 
 
   # The following adds the Cupertino Icons font to your application.

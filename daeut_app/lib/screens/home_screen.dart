@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if( token == null || token == '' ) {
       print('미리 저장된 jwt 토큰 없음');
       print('로그인 화면으로 이동...');
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/user/login');
       return;
     }
     // 저장된 토큰이 있으면 ➡ 서버로 사용자 정보 요청
@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     print('로그인 화면으로 이동...');
-                    Navigator.pushReplacementNamed(context, '/login');
+                    Navigator.pushReplacementNamed(context, '/user/login');
                   },
                   child: Text('로그인'),
                 )
@@ -79,7 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     print('로그아웃 처리...');
-                    userProvider.logout();
+                    await userProvider.logout();
+                    Navigator.pushReplacementNamed(context, '/main'); // 로그아웃 후 MainScreen으로 이동
                   },
                   child: Text('로그아웃'),
                 ),
@@ -88,5 +89,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  
 }

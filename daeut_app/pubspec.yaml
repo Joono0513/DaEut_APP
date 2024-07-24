@@ -31,10 +31,32 @@ dependencies:
   flutter:
     sdk: flutter
 
+  convert: ^3.1.1
+  image_picker: ^0.8.4+3
+  path: ^1.8.0
+  path_provider: ^2.0.7
+
+  #  안전한 저장소
+  flutter_secure_storage: ^5.0.0
+
+  # provider (상태 공유 - 로그인 인증정보 공유)
+  provider: ^6.1.1
+
+  # http
+  http: ^1.2.2
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
+
+  # 달력 선택
+  calendar_date_picker2: ^1.1.5
+  # 날짜 선택
+  flutter_datetime_picker_plus: ^2.2.0
+  # 날짜 포맷
+  intl: ^0.19.0
+  awesome_dialog: ^3.2.1
 
 dev_dependencies:
   flutter_test:

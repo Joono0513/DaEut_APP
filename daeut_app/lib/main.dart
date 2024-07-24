@@ -1,3 +1,4 @@
+import 'package:daeut_app/screens/list_screen.dart';
 import 'package:daeut_app/screens/insert_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,62 +27,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/main',
+      initialRoute: '/reservation/list',
       routes: {
-        '/main': (context) => MainScreen(),
-        '/home': (context) => HomeScreen(),
-        '/user/login': (context) => LoginScreen(),
-        '/user/join': (context) => JoinScreen(),
-        '/reservation': (context) => InsertScreen(),
+        '/reservation/list': (context) => const ListScreen(),
+        // 다른 경로들을 추가할 수 있습니다.
       },
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("DaEut 1인 가구의 모든 것"),
-      ),
-      body: TabBarView(
-        controller: controller,
-        children: const [JoinScreen(), LoginScreen()],
-      ),
-      bottomNavigationBar: TabBar(
-        tabs: const [
-          Tab(
-            child: Text("회원가입"),
-          ),
-          Tab(
-            child: Text("로그인"),
-          ),
-        ],
-        controller: controller,
-      ),
     );
   }
 }

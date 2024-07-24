@@ -1,4 +1,3 @@
-import 'package:daeut_app/main_screen.dart';
 import 'package:daeut_app/reservation/list_screen.dart';
 import 'package:daeut_app/screens/insert_screen.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +29,6 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/main',
       routes: {
-        '/main': (context) => const MainScreen(),
         '/reservation/list': (context) => const ListScreen(),
       },
     );

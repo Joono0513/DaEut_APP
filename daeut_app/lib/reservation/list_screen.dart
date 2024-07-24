@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:daeut_app/provider/user_provider.dart';
+import 'package:daeut_app/screens/join_screen.dart';
+import 'package:daeut_app/screens/login_screen.dart';
+import 'package:daeut_app/screens/home_screen.dart';
+import 'package:daeut_app/screens/insert_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,12 +21,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'JWT 토큰 로그인',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MainScreen(),
+      initialRoute: '/main',
+      routes: {
+        '/main': (context) => const MainScreen(),
+        '/reservation/list': (context) => const ListScreen(),
+        // Add other routes here if necessary
+      },
     );
   }
 }
@@ -99,7 +115,7 @@ class ReservationCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Example service list
+    // Example service list with hardcoded data
     final serviceList = [
       {
         'serviceCategory': '청소',
@@ -108,7 +124,21 @@ class ReservationCardGrid extends StatelessWidget {
         'serviceNo': 1,
         'fileNo': 1,
       },
-      // Add more services here
+      {
+        'serviceCategory': '이사',
+        'serviceName': '포장이사 서비스',
+        'userName': '김철수',
+        'serviceNo': 2,
+        'fileNo': 2,
+      },
+      {
+        'serviceCategory': '수리',
+        'serviceName': '가전제품 수리',
+        'userName': '이영희',
+        'serviceNo': 3,
+        'fileNo': 3,
+      },
+      // Add more hardcoded services here
     ];
 
     return GridView.builder(
@@ -131,7 +161,7 @@ class ReservationCardGrid extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   color: Colors.grey[200],
-                  child: Text(service['serviceCategory']),
+                  child: Text(service['serviceCategory'] as String),
                 ),
                 InkWell(
                   onTap: () {
@@ -139,11 +169,11 @@ class ReservationCardGrid extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) => ReservationReadScreen(
-                              serviceNo: service['serviceNo'])),
+                              serviceNo: service['serviceNo'] as int)),
                     );
                   },
                   child: Image.network(
-                    'https://example.com/file/img/${service['fileNo']}',
+                    'https://via.placeholder.com/365x245.png?text=Image+${service['fileNo']}',
                     width: 365,
                     height: 245,
                     fit: BoxFit.cover,
@@ -155,10 +185,10 @@ class ReservationCardGrid extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        service['serviceName'],
+                        service['serviceName'] as String,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(service['userName']),
+                      Text(service['userName'] as String),
                     ],
                   ),
                 ),
@@ -167,6 +197,23 @@ class ReservationCardGrid extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class ListScreen extends StatelessWidget {
+  const ListScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Placeholder for ListScreen content
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reservation List'),
+      ),
+      body: const Center(
+        child: Text('Reservation List Page'),
+      ),
     );
   }
 }
@@ -247,26 +294,26 @@ class Pagination extends StatelessWidget {
             // Navigate to previous page
           },
         ),
-        for (int i = servicePage['start']; i <= servicePage['end']; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: GestureDetector(
-              onTap: () {
-                // Navigate to specific page
-              },
-              child: Text(
-                '$i',
-                style: TextStyle(
-                  fontWeight: servicePage['page'] == i
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: servicePage['page'] == i
-                      ? Colors.deepPurple
-                      : Colors.black,
-                ),
-              ),
-            ),
-          ),
+        // for (int i = servicePage['start']; i <= servicePage['end']; i++)
+        //   Padding(
+        //     padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        //     child: GestureDetector(
+        //       onTap: () {
+        //         // Navigate to specific page
+        //       },
+        //       child: Text(
+        //         '$i',
+        //         style: TextStyle(
+        //           fontWeight: servicePage['page'] == i
+        //               ? FontWeight.bold
+        //               : FontWeight.normal,
+        //           color: servicePage['page'] == i
+        //               ? Colors.deepPurple
+        //               : Colors.black,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
         IconButton(
           icon: const Icon(Icons.navigate_next),
           onPressed: () {

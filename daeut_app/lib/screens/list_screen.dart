@@ -25,7 +25,7 @@ class _ListScreenState extends State<ListScreen> {
 
   // 게시글 목록 데이터 요청
   Future<List<ServiceRequest>> getServiceList() async {
-    var url = "http://10.0.2.2:8080/reservation/reservation";
+    var url = "http://10.0.2.2:8080/reservation";
     var response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {

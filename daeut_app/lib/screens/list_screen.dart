@@ -1,4 +1,4 @@
-import 'dart:convert'; // Add this for jsonDecode
+ import 'dart:convert'; // Add this for jsonDecode
 import 'package:daeut_app/models/service_request.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +25,7 @@ class _ListScreenState extends State<ListScreen> {
 
   // 게시글 목록 데이터 요청
   Future<List<ServiceRequest>> getServiceList() async {
-    var url = "http://10.0.2.2:8080/reservation";
+    var url = "http://10.0.2.2:8080/reservation/reservation";
     var response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -42,7 +42,7 @@ class _ListScreenState extends State<ListScreen> {
           serviceCategory: item['serviceCategory'],
           serviceContent: item['serviceContent'],
           thumbnailPath: item['thumbnailPath'],
-          filePaths: List<String>.from(item['filePaths']),
+          filePaths: item['filePaths'] != null ? List<String>.from(item['filePaths']) : [],
         ));
       }
 

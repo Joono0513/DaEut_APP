@@ -1,7 +1,7 @@
- import 'dart:convert'; // Add this for jsonDecode
-import 'package:daeut_app/models/service_request.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:daeut_app/models/service.dart' as service_model;
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -11,7 +11,7 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  List<ServiceRequest> _serviceList = [];
+  List<service_model.Service> _serviceList = [];
 
   @override
   void initState() {
@@ -23,75 +23,90 @@ class _ListScreenState extends State<ListScreen> {
     });
   }
 
-  // 게시글 목록 데이터 요청
-  Future<List<ServiceRequest>> getServiceList() async {
-    var url = "http://10.0.2.2:8080/reservation/reservation";
+  Future<List<service_model.Service>> getServiceList() async {
+    var url = "http://10.0.2.2:8080/reservation";
     var response = await http.get(Uri.parse(url));
+    print(":::::: response - body ::::::");
+    print(response.body);
 
-    if (response.statusCode == 200) {
-      // UTF-8 디코딩
-      var utf8Decoded = utf8.decode(response.bodyBytes);
-      // JSON 디코딩
-      var serviceList = jsonDecode(utf8Decoded);
-      List<ServiceRequest> list = [];
+    var utf8Decoded = utf8.decode(response.bodyBytes);
+    var jsonResponse = jsonDecode(utf8Decoded);
 
-      for (var item in serviceList) {
-        list.add(ServiceRequest(
-          serviceName: item['serviceName'],
-          servicePrice: item['servicePrice'],
-          serviceCategory: item['serviceCategory'],
-          serviceContent: item['serviceContent'],
-          thumbnailPath: item['thumbnailPath'],
-          filePaths: item['filePaths'] != null ? List<String>.from(item['filePaths']) : [],
-        ));
-      }
+    var serviceListJson = jsonResponse['serviceList'];
 
-      return list;
-    } else {
-      throw Exception('Failed to load service requests');
+    if (serviceListJson == null || serviceListJson.isEmpty) {
+      return [];
     }
+
+    return serviceListJson.map<service_model.Service>((json) {
+      var service = service_model.Service.fromJson(json);
+
+      return service_model.Service(
+        serviceNo: service.serviceNo ?? 0,
+        serviceName: service.serviceName ?? 'Unknown',
+        serviceCategory: service.serviceCategory ?? 'Unknown',
+        servicePrice: service.servicePrice ?? 0,
+        serviceContent: service.serviceContent ?? '',
+        averageRating: service.averageRating ?? 0,
+        imageUrls: service.imageUrls ?? [],
+        partner: service.partner ?? service_model.Partner(
+          partnerNo: 0,
+          partnerCareer: '',
+          introduce: '',
+          userName: '',
+          thumbnailUrl: '',
+        ),
+      );
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("서비스 예약하기"),
+        title: Text('서비스 목록'),
       ),
-      body: Container(
+      body: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: Center(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,      // 열 개수
-              crossAxisSpacing: 10.0, // 열 간격
-              mainAxisSpacing: 10.0,  // 행 간격
-            ),
-            itemBuilder: (context, position) {
-              final serviceRequest = _serviceList[position];
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
-                color: Colors.grey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      serviceRequest.thumbnailPath,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 10,),
-                    Text(
-                      serviceRequest.serviceName,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              );
-            },
-            itemCount: _serviceList.length,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,       // 열 개수
+            crossAxisSpacing: 10.0,  // 열 간격
+            mainAxisSpacing: 10.0,   // 행 간격
           ),
+          itemCount: _serviceList.length,
+          itemBuilder: (context, index) {
+            var service = _serviceList[index];
+            return Card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: service.imageUrls.isNotEmpty
+                        ? Image.network(
+                            service.imageUrls.first,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          )
+                        : Container(color: Colors.grey),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      service.serviceName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('${service.servicePrice}원'),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

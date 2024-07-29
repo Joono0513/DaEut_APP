@@ -84,6 +84,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   child: Text('로그아웃'),
                 ),
+                ElevatedButton(
+                  onPressed: () {
+                    print('List 화면으로 이동...');
+                    Navigator.pushNamed(context, '/reservation/reservationList');
+                  },
+                  child: Text('예약 목록 보기'),
+                ),
           ],
         ),
       ),

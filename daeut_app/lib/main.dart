@@ -33,9 +33,10 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomeScreen(),
         '/user/login': (context) => LoginScreen(),
         '/user/join': (context) => JoinScreen(),
-        '/reservation/reservationInsert': (context) => InsertScreen(),
-        '/reservation/reservationRead': (context) => ReadScreen(),
         '/reservation/reservationList': (context) => ListScreen(),
+        '/reservation/reservationRead': (context) => ReadScreen(),
+        '/reservation/reservationInsert': (context) => InsertScreen(),
+        // '/reservation/reservationUpdate': (context) => UpdateScreen(),
       },
     );
   }

@@ -28,9 +28,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/main',
+      initialRoute: '/home',
       routes: {
-        '/main': (context) => MainScreen(),
         '/home': (context) => HomeScreen(),
         '/user/login': (context) => LoginScreen(),
         '/user/join': (context) => JoinScreen(),

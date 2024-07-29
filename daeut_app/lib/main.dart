@@ -1,5 +1,6 @@
 import 'package:daeut_app/screens/list_screen.dart';
 import 'package:daeut_app/screens/insert_screen.dart';
+import 'package:daeut_app/screens/read_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:daeut_app/provider/user_provider.dart';
@@ -27,10 +28,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/reservation/list',
+      initialRoute: '/home',
       routes: {
-        '/reservation/list': (context) => const ListScreen(),
-        // 다른 경로들을 추가할 수 있습니다.
+        '/home': (context) => HomeScreen(),
+        '/user/login': (context) => LoginScreen(),
+        '/user/join': (context) => JoinScreen(),
+        '/reservation/reservationInsert': (context) => InsertScreen(),
+        '/reservation/reservationRead': (context) => ReadScreen(),
+        '/reservation/reservationList': (context) => ListScreen(),
       },
     );
   }

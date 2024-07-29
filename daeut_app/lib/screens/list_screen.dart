@@ -1,7 +1,7 @@
-import 'dart:convert'; // Add this for jsonDecode
-import 'package:daeut_app/models/service.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:daeut_app/models/service.dart' as service_model;
 
 class ListScreen extends StatefulWidget {
   const ListScreen({super.key});
@@ -11,7 +11,7 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  List<Service> _serviceList = [];
+  List<service_model.Service> _serviceList = [];
 
   @override
   void initState() {
@@ -23,44 +23,41 @@ class _ListScreenState extends State<ListScreen> {
     });
   }
 
-  // 게시글 목록 데이터 요청
-  Future<List<Service>> getServiceList() async {
+  Future<List<service_model.Service>> getServiceList() async {
     var url = "http://10.0.2.2:8080/reservation";
     var response = await http.get(Uri.parse(url));
     print(":::::: response - body ::::::");
     print(response.body);
 
-    // UTF-8 디코딩
     var utf8Decoded = utf8.decode(response.bodyBytes);
-    // JSON 디코딩
     var jsonResponse = jsonDecode(utf8Decoded);
 
-    // 'serviceList' 키를 통해 리스트를 가져옴
-    var serviceList = jsonResponse['serviceList'];
+    var serviceListJson = jsonResponse['serviceList'];
 
-    // Null 및 빈 리스트 체크
-    if (serviceList == null || serviceList.isEmpty) {
+    if (serviceListJson == null || serviceListJson.isEmpty) {
       return [];
     }
 
-    List<Service> list = [];
+    return serviceListJson.map<service_model.Service>((json) {
+      var service = service_model.Service.fromJson(json);
 
-    for (var item in serviceList) {
-      if (item != null) {
-        list.add(Service(
-          serviceNo: item['serviceNo'],
-          serviceCategory: item['serviceCategory'],
-          serviceName: item['serviceName'],
-          servicePrice: item['servicePrice'],
-          serviceContent: item['serviceContent'],
-          partnerNo: item['partnerNo'],
-          thumbnailPath: item['thumbnailPath'],
-          filePaths: item['filePaths'] != null ? List<String>.from(item['filePaths']) : [],
-        ));
-      }
-    }
-    print(list);
-    return list;
+      return service_model.Service(
+        serviceNo: service.serviceNo ?? 0,
+        serviceName: service.serviceName ?? 'Unknown',
+        serviceCategory: service.serviceCategory ?? 'Unknown',
+        servicePrice: service.servicePrice ?? 0,
+        serviceContent: service.serviceContent ?? '',
+        averageRating: service.averageRating ?? 0,
+        imageUrls: service.imageUrls ?? [],
+        partner: service.partner ?? service_model.Partner(
+          partnerNo: 0,
+          partnerCareer: '',
+          introduce: '',
+          userName: '',
+          thumbnailUrl: '',
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -85,9 +82,9 @@ class _ListScreenState extends State<ListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: service.thumbnailPath != null 
+                    child: service.imageUrls.isNotEmpty
                         ? Image.network(
-                            service.thumbnailPath!,
+                            service.imageUrls.first,
                             fit: BoxFit.cover,
                             width: double.infinity,
                           )
@@ -96,7 +93,7 @@ class _ListScreenState extends State<ListScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      service.serviceName ?? 'Unknown',
+                      service.serviceName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                       ),
@@ -104,7 +101,7 @@ class _ListScreenState extends State<ListScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('${service.servicePrice ?? '가격 정보 없음'}원'),
+                    child: Text('${service.servicePrice}원'),
                   ),
                 ],
               ),

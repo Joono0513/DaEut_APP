@@ -1,7 +1,7 @@
-import 'package:daeut_app/provider/user_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:daeut_app/provider/user_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,79 +11,55 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // FlutterSecureStorage : 안전한 저장소
   final storage = const FlutterSecureStorage();
-  String jwtToken = "";
 
   @override
   void initState() {
     super.initState();
-
-    loadJwtToken();
-  }
-
-  /**
-   * 💍 저장된 JWT 토큰 읽어오기
-   */
-  Future<void> loadJwtToken() async {
-    // 저장된 JWT 토큰 읽기
-    String? token = await storage.read(key: 'jwtToken');
-    
-    // 저장된 토큰이 없으면 ➡ 로그인 화면으로
-    if( token == null || token == '' ) {
-      print('미리 저장된 jwt 토큰 없음');
-      print('로그인 화면으로 이동...');
-      Navigator.pushReplacementNamed(context, '/user/login');
-      return;
-    }
-    // 저장된 토큰이 있으면 ➡ 서버로 사용자 정보 요청
-
-    setState(() {
-      jwtToken = token ?? "";
-    });
-  }
-
-  Future<void> saveJwtToken(String token) async {
-    await storage.write(key: 'jwtToken', value: token);
+    Provider.of<UserProvider>(context, listen: false).loadUserInfo();
   }
 
   @override
   Widget build(BuildContext context) {
-    // listen: (provider 구독여부)
-    // - true : provider 에서 notifyListeners() 호출 시, consumer 리렌더링 ⭕
-    // - false : provider 에서 notifyListeners() 호출 시, consumer 리렌더링 ❌
     UserProvider userProvider = Provider.of<UserProvider>(context, listen: true);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('JWT 토큰'),
+        title: const Text('JWT 토큰'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('사용자 정보'),
+            const Text('사용자 정보'),
             Text('userId : ${userProvider.userInfo.userId ?? '없음'}'),
             Text('name : ${userProvider.userInfo.userName ?? '없음'}'),
             Text('email : ${userProvider.userInfo.userEmail ?? '없음'}'),
-            Text('JWT Token: $jwtToken'),
-            !userProvider.isLogin ? 
-                ElevatedButton(
-                  onPressed: () async {
-                    print('로그인 화면으로 이동...');
-                    Navigator.pushReplacementNamed(context, '/user/login');
-                  },
-                  child: Text('로그인'),
-                )
-              :
-                ElevatedButton(
-                  onPressed: () async {
-                    print('로그아웃 처리...');
-                    await userProvider.logout();
-                    Navigator.pushReplacementNamed(context, '/main'); // 로그아웃 후 MainScreen으로 이동
-                  },
-                  child: Text('로그아웃'),
-                ),
+            Text('JWT Token: ${userProvider.isLogin ? '있음' : '없음'}'),
+            !userProvider.isLogin
+                ? ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pushReplacementNamed(context, '/user/login');
+                    },
+                    child: const Text('로그인'),
+                  )
+                : Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          await userProvider.logout();
+                          Navigator.pushReplacementNamed(context, '/home');
+                        },
+                        child: const Text('로그아웃'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/reservation/reservationList');
+                        },
+                        child: const Text('예약 목록 보기'),
+                      ),
+                    ],
+                  ),
           ],
         ),
       ),
